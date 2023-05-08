@@ -1,4 +1,9 @@
-import { NativeModules, Platform } from 'react-native';
+import {
+  AppRegistry,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+} from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-beacon' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,6 +22,47 @@ const Beacon = NativeModules.Beacon
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return Beacon.multiply(a, b);
+type BeaconPayload = {
+  id: string;
+  uuid: string;
+  minor?: number;
+  major?: number;
+};
+
+type Beacon = {
+  uuid: string;
+  distance: number;
+};
+
+let watchBeaconsCallback: (beacons: Beacon[]) => void = () => {};
+
+if (Platform.OS === 'android') {
+  AppRegistry.registerHeadlessTask('Beacons', () => async (beacons) => {
+    watchBeaconsCallback!(beacons);
+    return Promise.resolve();
+  });
+} else if (Platform.OS === 'ios') {
+  const myModuleEvt = new NativeEventEmitter(NativeModules.MyEventEmitter);
+  myModuleEvt.addListener('watchBeacons', watchBeaconsCallback!);
 }
+
+export default {
+  async init(options: {
+    registerBeaconsTask: (beacons: Beacon[]) => void;
+  }): Promise<boolean> {
+    if (Beacon.init()) {
+      watchBeaconsCallback = options.registerBeaconsTask;
+      return true;
+    }
+    return false;
+  },
+  requestPermissions(): Promise<boolean> {
+    return Beacon.requestPermissions();
+  },
+  startBeaconScan(beacons: BeaconPayload[]) {
+    Beacon.startBeaconScan(beacons);
+  },
+  stopBeaconScan() {
+    Beacon.stopBeaconScan();
+  },
+};
