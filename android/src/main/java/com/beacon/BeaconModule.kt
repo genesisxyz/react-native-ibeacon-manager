@@ -77,7 +77,7 @@ class BeaconModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun init(promise: Promise) {
+  fun initialize(promise: Promise) {
     beaconServiceConnection.startService(promise)
   }
 

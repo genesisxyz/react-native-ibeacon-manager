@@ -43,14 +43,16 @@ if (Platform.OS === 'android') {
   });
 } else if (Platform.OS === 'ios') {
   const myModuleEvt = new NativeEventEmitter(NativeModules.MyEventEmitter);
-  myModuleEvt.addListener('watchBeacons', watchBeaconsCallback!);
+  myModuleEvt.addListener('watchBeacons', (beacons) =>
+    watchBeaconsCallback(beacons)
+  );
 }
 
 export default {
   async init(options: {
     registerBeaconsTask: (beacons: Beacon[]) => void;
   }): Promise<boolean> {
-    if (Beacon.init()) {
+    if (await Beacon.initialize()) {
       watchBeaconsCallback = options.registerBeaconsTask;
       return true;
     }
