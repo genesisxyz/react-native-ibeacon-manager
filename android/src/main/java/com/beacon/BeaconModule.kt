@@ -2,9 +2,14 @@ package com.beacon
 
 import android.Manifest
 import android.app.NotificationManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.PermissionAwareActivity
@@ -18,13 +23,6 @@ class BeaconModule(reactContext: ReactApplicationContext) :
 
   override fun getName(): String {
     return NAME
-  }
-
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
   }
 
   @ReactMethod
@@ -63,6 +61,12 @@ class BeaconModule(reactContext: ReactApplicationContext) :
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      val bluetoothConnectSelfPermission = ContextCompat.checkSelfPermission(reactApplicationContext, Manifest.permission.BLUETOOTH_CONNECT)
+
+      if (bluetoothConnectSelfPermission != PackageManager.PERMISSION_GRANTED) {
+        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+      }
+
       val bluetoothScanSelfPermission = ContextCompat.checkSelfPermission(reactApplicationContext, Manifest.permission.BLUETOOTH_SCAN)
 
       if (bluetoothScanSelfPermission != PackageManager.PERMISSION_GRANTED) {
@@ -74,6 +78,18 @@ class BeaconModule(reactContext: ReactApplicationContext) :
       activity?.requestPermissions(permissions.toTypedArray(), 1, this)
     }
     promise.resolve(true)
+  }
+
+  @ReactMethod
+  fun enableBluetooth() {
+    val bluetoothManager = reactApplicationContext.currentActivity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    val bluetoothAdapter = bluetoothManager.adapter
+    if (!bluetoothAdapter.isEnabled) {
+      val intentBtEnabled = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+      if (ActivityCompat.checkSelfPermission(reactApplicationContext, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+        currentActivity?.startActivityForResult(intentBtEnabled, REQUEST_ENABLE_BLUETOOTH)
+      }
+    }
   }
 
   @ReactMethod
@@ -101,6 +117,8 @@ class BeaconModule(reactContext: ReactApplicationContext) :
     const val NAME = "Beacon"
 
     const val TAG = "BeaconModule"
+
+    const val REQUEST_ENABLE_BLUETOOTH = 1
   }
 
   // region PermissionListener

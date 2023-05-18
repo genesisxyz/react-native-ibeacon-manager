@@ -12,6 +12,8 @@ RCT_EXTERN_METHOD(startBeaconScan:(NSArray<NSDictionary *> *)beacons)
 
 RCT_EXTERN_METHOD(stopBeaconScan)
 
+RCT_EXTERN_METHOD(enableBluetooth)
+
 + (BOOL)requiresMainQueueSetup
 {
   return NO;

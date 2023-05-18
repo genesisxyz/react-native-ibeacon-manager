@@ -61,6 +61,9 @@ export default {
   requestPermissions(): Promise<boolean> {
     return Beacon.requestPermissions();
   },
+  enableBluetooth() {
+    Beacon.enableBluetooth();
+  },
   startBeaconScan(beacons: BeaconPayload[]) {
     Beacon.startBeaconScan(beacons);
   },

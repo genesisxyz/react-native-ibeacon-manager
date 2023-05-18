@@ -70,6 +70,10 @@ class Beacon: NSObject, CLLocationManagerDelegate {
     }
   }
   
+  @objc(enableBluetooth)
+  func enableBluetooth() -> Void {
+    
+  }
   
   // http://www.davidgyoungtech.com/2023/02/10/forever-ranging
   private func infiniteTask() {

@@ -36,6 +36,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Hello, World!</Text>
+      <Button title="Enable BT" onPress={Beacon.enableBluetooth} />
       <Button
         title={scanStarted ? 'Stop scan' : 'Start scan'}
         onPress={toggleScan}
