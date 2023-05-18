@@ -75,6 +75,11 @@ class Beacon: NSObject, CLLocationManagerDelegate {
     
   }
   
+  @objc(setOptions:)
+  func setOptions(options: [String: AnyObject]) -> Void {
+    
+  }
+  
   // http://www.davidgyoungtech.com/2023/02/10/forever-ranging
   private func infiniteTask() {
       NSLog("Attempting to extend background running time")

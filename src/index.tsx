@@ -34,6 +34,26 @@ type Beacon = {
   distance: number;
 };
 
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+export type Options = DeepPartial<{
+  android: {
+    notification: {
+      id: number;
+      contentTitle: string;
+      contentText: string;
+      channel: {
+        id: string;
+        name: string;
+        description: string;
+      };
+      smallIcon: string;
+    };
+  };
+}>;
+
 let watchBeaconsCallback: (beacons: Beacon[]) => void = () => {};
 
 if (Platform.OS === 'android') {
@@ -57,6 +77,9 @@ export default {
       return true;
     }
     return false;
+  },
+  setOptions(options: Options): void {
+    Beacon.setOptions(options);
   },
   requestPermissions(): Promise<boolean> {
     return Beacon.requestPermissions();
