@@ -6,12 +6,16 @@ class Beacon: NSObject, CLLocationManagerDelegate {
 
   var locationManager: CLLocationManager? = nil
   
+  var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
+  
   func initializeLocationManager() -> CLLocationManager {
-      let manager = locationManager ?? CLLocationManager()
-      manager.delegate = self
-      manager.allowsBackgroundLocationUpdates = true
-      manager.pausesLocationUpdatesAutomatically = false
-      return manager
+    let manager = locationManager ?? CLLocationManager()
+    manager.delegate = self
+    manager.allowsBackgroundLocationUpdates = true
+    manager.pausesLocationUpdatesAutomatically = false
+    manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+    manager.distanceFilter = 3000.0
+    return manager
   }
 
   
@@ -19,16 +23,10 @@ class Beacon: NSObject, CLLocationManagerDelegate {
   func initialize(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
     syncMain {
       locationManager = initializeLocationManager();
+      locationManager?.startUpdatingLocation()
       
-      let center = UNUserNotificationCenter.current()
-      center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-          
-        if let error = error {
-            // Handle the error here.
-        }
-        
-        // Enable or disable features based on the authorization.
-      }
+      // keeps the app open for ranging beacons
+      infiniteTask()
     }
     resolve(true)
   }
@@ -56,6 +54,7 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       
       if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
         locationManager?.startMonitoring(for: region)
+        locationManager?.requestState(for: region)
       }
     }
   }
@@ -70,6 +69,44 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       locationManager?.stopMonitoring(for: region)
     }
   }
+  
+  
+  // http://www.davidgyoungtech.com/2023/02/10/forever-ranging
+  private func infiniteTask() {
+      NSLog("Attempting to extend background running time")
+          
+      self.backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "DummyTask", expirationHandler: {
+        NSLog("Background task expired by iOS.")
+        UIApplication.shared.endBackgroundTask(self.backgroundTask)
+      })
+
+        
+      var lastLogTime = 0.0
+      DispatchQueue.global().async {
+        let startedTime = Int(Date().timeIntervalSince1970) % 10000000
+        NSLog("*** STARTED BACKGROUND THREAD")
+        while(true) {
+            DispatchQueue.main.async {
+                let now = Date().timeIntervalSince1970
+                let backgroundTimeRemaining = UIApplication.shared.backgroundTimeRemaining
+                if abs(now - lastLogTime) >= 2.0 {
+                    lastLogTime = now
+                    if backgroundTimeRemaining < 10.0 {
+                      NSLog("About to suspend based on background thread running out.")
+                    }
+                    if (backgroundTimeRemaining < 200000.0) {
+                     NSLog("Thread \(startedTime) background time remaining: \(backgroundTimeRemaining)")
+                    }
+                    else {
+                      //NSLog("Thread \(startedTime) background time remaining: INFINITE")
+                    }
+                }
+            }
+            sleep(1)
+        }
+      }
+  }
+
   
   // MARK: CLLocationManagerDelegate
   
