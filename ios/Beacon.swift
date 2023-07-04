@@ -17,7 +17,6 @@ class Beacon: NSObject, CLLocationManagerDelegate {
     manager.distanceFilter = 3000.0
     return manager
   }
-
   
   @objc(initialize:withRejecter:)
   func initialize(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
@@ -26,7 +25,8 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       locationManager?.startUpdatingLocation()
       
       // keeps the app open for ranging beacons
-      infiniteTask()
+      // TODO: disabled because when React hot reloads it keeps creating new threads
+      // infiniteTask()
     }
     resolve(true)
   }
@@ -43,10 +43,19 @@ class Beacon: NSObject, CLLocationManagerDelegate {
 
       let id = beacon["id"] as! String
       let uuid = beacon["uuid"] as! String
-      let major = beacon["major"] as! Double
-      let minor = beacon["minor"] as! Double
+      let major = beacon["major"] as? Double
+      let minor = beacon["minor"] as? Double
       
-      let region = CLBeaconRegion(proximityUUID: UUID(uuidString: uuid)!, major: CLBeaconMajorValue(major), minor: CLBeaconMajorValue(minor), identifier: id)
+      var region: CLBeaconRegion;
+      
+      if (major == nil && minor == nil) {
+        region = CLBeaconRegion(uuid: UUID(uuidString: uuid)!, identifier: id)
+      } else if (minor == nil) {
+        region = CLBeaconRegion(uuid: UUID(uuidString: uuid)!, major: CLBeaconMajorValue(major!), identifier: id)
+      } else {
+        let constraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: uuid)!, major: CLBeaconMajorValue(major!), minor: CLBeaconMajorValue(minor!))
+        region = CLBeaconRegion(beaconIdentityConstraint: constraint, identifier: id)
+      }
       
       region.notifyOnExit = true
       region.notifyOnEntry = true
@@ -82,6 +91,10 @@ class Beacon: NSObject, CLLocationManagerDelegate {
   
   // http://www.davidgyoungtech.com/2023/02/10/forever-ranging
   private func infiniteTask() {
+    if (self.backgroundTask != UIBackgroundTaskIdentifier.invalid) {
+      return;
+    }
+    
       NSLog("Attempting to extend background running time")
           
       self.backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "DummyTask", expirationHandler: {
@@ -178,8 +191,10 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       beacon.accuracy > -1
     }).map { beacon in
       [
-        "uuid": beacon.proximityUUID.uuidString,
+        "uuid": beacon.uuid.uuidString,
         "distance": beacon.accuracy,
+        "major": beacon.major,
+        "minor": beacon.minor,
       ]
     }
     

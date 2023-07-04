@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.*
 import android.util.Log
 import com.facebook.react.HeadlessJsTaskService
-import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import org.altbeacon.beacon.*
@@ -132,10 +132,15 @@ class BeaconService: Service(), ServiceInterface {
 
       val id = beaconMap.getString("id")!!
       val uuid = beaconMap.getString("uuid")!!
-      val minor = beaconMap.getInt("minor")
-      val major = beaconMap.getInt("major")
+      val major = if (beaconMap.hasKey("major")) beaconMap.getInt("major") else null
+      val minor = if (beaconMap.hasKey("minor")) beaconMap.getInt("minor") else null
 
-      val region = Region(id, Identifier.parse(uuid), Identifier.fromInt(minor), Identifier.fromInt(major))
+      val region = Region(
+        id,
+        Identifier.parse(uuid),
+        if (major != null) Identifier.fromInt(major) else null,
+        if (minor != null) Identifier.fromInt(minor) else null,
+      )
 
       regions.add(region)
 
@@ -177,15 +182,31 @@ class BeaconService: Service(), ServiceInterface {
 
   private val mRangeNotifier: RangeNotifier = RangeNotifier { beacons, region ->
     Log.d(BeaconModule.TAG, "Ranged: ${beacons.count()} beacons")
+
+    if (beacons.isEmpty()) return@RangeNotifier;
+    
+    val beaconsArray = mutableListOf<Bundle>()
+
     for (beacon: Beacon in beacons) {
       Log.d(BeaconModule.TAG, "$beacon about ${beacon.distance} meters away")
 
-      val myIntent = Intent(applicationContext, BeaconEventService::class.java)
-      myIntent.putExtra("uuid", beacon.id1.toString())
-      myIntent.putExtra("distance", beacon.distance)
+      val beaconsMap = Bundle()
 
-      applicationContext.startService(myIntent)
-      HeadlessJsTaskService.acquireWakeLockNow(applicationContext)
+      beaconsMap.putString("uuid", beacon.id1.toString())
+      beaconsMap.putInt("major", beacon.id2.toInt())
+      beaconsMap.putInt("minor", beacon.id3.toInt())
+      beaconsMap.putDouble("distance", beacon.distance)
+
+      beaconsArray.add(beaconsMap)
     }
+
+    val extra = Bundle()
+    extra.putParcelableArray("beacons", beaconsArray.toTypedArray())
+
+    val myIntent = Intent(applicationContext, BeaconEventService::class.java)
+    myIntent.putExtra("data", extra)
+
+    applicationContext.startService(myIntent)
+    HeadlessJsTaskService.acquireWakeLockNow(applicationContext)
   }
 }

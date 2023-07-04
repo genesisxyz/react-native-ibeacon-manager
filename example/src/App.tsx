@@ -16,13 +16,19 @@ export default function App() {
   const [scanStarted, setScanStarted] = React.useState(false);
 
   React.useEffect(() => {
-    Beacon.init({
-      registerBeaconsTask: (beacons) => {
-        console.log('beacons', beacons);
-      },
-    }).then(async () => {
+    Beacon.init().then(async () => {
       await Beacon.requestPermissions();
     });
+  }, []);
+
+  React.useEffect(() => {
+    const listener = Beacon.watchBeacons((beacons) => {
+      console.log(beacons);
+    });
+
+    return () => {
+      listener.remove();
+    };
   }, []);
 
   const toggleScan = () => {

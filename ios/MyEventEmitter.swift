@@ -43,4 +43,8 @@ class MyEventEmitter: RCTEventEmitter {
       self.sendEvent(withName: "watchBeacons", body: beacons)
     }
   }
+  
+  override func removeListeners(_ count: Double) {
+    NSLog("removeListeners")
+  }
 }

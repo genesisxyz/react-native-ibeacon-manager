@@ -32,6 +32,8 @@ type BeaconPayload = {
 type Beacon = {
   uuid: string;
   distance: number;
+  major: number;
+  minor: number;
 };
 
 type DeepPartial<T> = {
@@ -54,29 +56,47 @@ export type Options = DeepPartial<{
   };
 }>;
 
-let watchBeaconsCallback: (beacons: Beacon[]) => void = () => {};
+let listeners: ((beacons: Beacon[]) => void)[] = [];
+
+let myModuleEvt: NativeEventEmitter;
 
 if (Platform.OS === 'android') {
-  AppRegistry.registerHeadlessTask('Beacons', () => async (beacons) => {
-    watchBeaconsCallback!(beacons);
+  AppRegistry.registerHeadlessTask('Beacons', () => async (data: any) => {
+    const { beacons } = data.data;
+    listeners.forEach((listener) => listener(beacons));
     return Promise.resolve();
   });
-} else if (Platform.OS === 'ios') {
-  const myModuleEvt = new NativeEventEmitter(NativeModules.MyEventEmitter);
-  myModuleEvt.addListener('watchBeacons', (beacons) =>
-    watchBeaconsCallback(beacons)
-  );
+} else {
+  myModuleEvt = new NativeEventEmitter(NativeModules.MyEventEmitter);
 }
 
 export default {
-  async init(options: {
-    registerBeaconsTask: (beacons: Beacon[]) => void;
-  }): Promise<boolean> {
-    if (await Beacon.initialize()) {
-      watchBeaconsCallback = options.registerBeaconsTask;
-      return true;
+  async init(): Promise<boolean> {
+    listeners = [];
+    return await Beacon.initialize();
+  },
+  watchBeacons(callback: (beacons: Beacon[]) => void) {
+    if (Platform.OS === 'ios') {
+      const listener = myModuleEvt.addListener('watchBeacons', callback);
+
+      return {
+        remove() {
+          listener.remove();
+        },
+      };
     }
-    return false;
+
+    listeners.push(callback);
+
+    return {
+      remove() {
+        // remove listener from listeners array
+        const index = listeners.indexOf(callback);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      },
+    };
   },
   setOptions(options: Options): void {
     Beacon.setOptions(options);
@@ -91,6 +111,9 @@ export default {
     Beacon.startBeaconScan(beacons);
   },
   stopBeaconScan() {
+    if (Platform.OS === 'ios') {
+      myModuleEvt.removeAllListeners('watchBeacons');
+    }
     Beacon.stopBeaconScan();
   },
 };
