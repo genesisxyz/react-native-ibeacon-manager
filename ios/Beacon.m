@@ -2,7 +2,10 @@
 
 @interface RCT_EXTERN_MODULE(Beacon, NSObject)
 
-RCT_EXTERN_METHOD(initialize:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(startService:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(stopService:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(requestPermissions:(RCTPromiseResolveBlock)resolve

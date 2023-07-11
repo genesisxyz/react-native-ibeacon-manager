@@ -80,7 +80,7 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
         } else {
             Log.w(TAG, "Intent service is not running")
         }
-        promise.resolve(null)
+        promise.resolve(true)
     }
 
     override fun onHostResume() {
@@ -95,7 +95,7 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
         Log.i(TAG, "onHostPause")
         if (mBound) {
             reactContext.unbindService(connection)
-            mBound = false // TODO: shouldn't be required
+            mBound = false
         }
     }
 

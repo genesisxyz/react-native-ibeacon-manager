@@ -89,8 +89,10 @@ class BeaconService: Service(), ServiceInterface {
   }
 
   override fun onDestroy() {
-
+    Log.d(TAG, "onDestroy")
     mServiceHandler?.removeCallbacksAndMessages(null)
+    beaconManager.removeMonitorNotifier(mMonitorNotifier)
+    beaconManager.removeRangeNotifier(mRangeNotifier)
     super.onDestroy()
   }
 
@@ -123,6 +125,7 @@ class BeaconService: Service(), ServiceInterface {
   private val regions = mutableListOf<Region>()
 
   fun startBeaconScan(beacons: ReadableArray) {
+    Log.d(TAG, "startBeaconScan")
     if (this.regions.isNotEmpty()) {
       this.stopBeaconScan()
     }
@@ -159,7 +162,6 @@ class BeaconService: Service(), ServiceInterface {
 
   private val mMonitorNotifier: MonitorNotifier = object : MonitorNotifier {
     override fun didEnterRegion(region: Region) {
-
       Log.d(BeaconModule.TAG, "BEACON didEnterRegion")
       beaconManager.startRangingBeacons(region)
     }
@@ -168,6 +170,29 @@ class BeaconService: Service(), ServiceInterface {
 
       Log.d(BeaconModule.TAG, "BEACON didExitRegion")
       beaconManager.stopRangingBeacons(region)
+
+      val beaconsArray = mutableListOf<Bundle>()
+
+      val beaconsMap = Bundle()
+
+      beaconsMap.putString("uuid", region.id1.toString())
+      if (region.id2 !== null) {
+        beaconsMap.putInt("major", region.id2.toInt())
+      }
+      if (region.id3 !== null) {
+        beaconsMap.putInt("minor", region.id3.toInt())
+      }
+
+      beaconsArray.add(beaconsMap)
+
+      val extra = Bundle()
+      extra.putParcelableArray("beacons", beaconsArray.toTypedArray())
+
+      val myIntent = Intent(applicationContext, BeaconEventService::class.java)
+      myIntent.putExtra("data", extra)
+
+      applicationContext.startService(myIntent)
+      HeadlessJsTaskService.acquireWakeLockNow(applicationContext)
     }
 
     override fun didDetermineStateForRegion(i: Int, region: Region) {
@@ -184,7 +209,7 @@ class BeaconService: Service(), ServiceInterface {
     Log.d(BeaconModule.TAG, "Ranged: ${beacons.count()} beacons")
 
     if (beacons.isEmpty()) return@RangeNotifier;
-    
+
     val beaconsArray = mutableListOf<Bundle>()
 
     for (beacon: Beacon in beacons) {

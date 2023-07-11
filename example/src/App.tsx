@@ -12,39 +12,31 @@ Beacon.setOptions({
   },
 });
 
+Beacon.watchBeacons((beacons) => {
+  console.log(beacons);
+});
+
 export default function App() {
   const [scanStarted, setScanStarted] = React.useState(false);
 
   React.useEffect(() => {
-    Beacon.init().then(async () => {
-      await Beacon.requestPermissions();
-    });
-  }, []);
-
-  React.useEffect(() => {
-    const listener = Beacon.watchBeacons((beacons) => {
-      console.log(beacons);
-    });
-
-    return () => {
-      listener.remove();
-    };
+    Beacon.requestPermissions();
   }, []);
 
   const toggleScan = () => {
     if (scanStarted) {
-      Beacon.stopBeaconScan();
-      setScanStarted(false);
+      Beacon.stopBeaconScan().then(() => {
+        setScanStarted(false);
+      });
     } else {
       Beacon.startBeaconScan([
         {
           id: 'my-beacon',
           uuid: 'D9FF627C-FE7D-425C-9CE8-A0652E6738FF',
-          major: 0,
-          minor: 0,
         },
-      ]);
-      setScanStarted(true);
+      ]).then(() => {
+        setScanStarted(true);
+      });
     }
   };
 

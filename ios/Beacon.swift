@@ -18,8 +18,8 @@ class Beacon: NSObject, CLLocationManagerDelegate {
     return manager
   }
   
-  @objc(initialize:withRejecter:)
-  func initialize(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
+  @objc(startService:withRejecter:)
+  func startService(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
     syncMain {
       locationManager = initializeLocationManager();
       locationManager?.startUpdatingLocation()
@@ -27,6 +27,15 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       // keeps the app open for ranging beacons
       // TODO: disabled because when React hot reloads it keeps creating new threads
       // infiniteTask()
+    }
+    resolve(true)
+  }
+  
+  @objc(stopService:withRejecter:)
+  func stopService(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
+    syncMain {
+      locationManager?.stopUpdatingLocation()
+      locationManager = nil
     }
     resolve(true)
   }
@@ -163,8 +172,21 @@ class Beacon: NSObject, CLLocationManagerDelegate {
       if CLLocationManager.isRangingAvailable() {
         manager.stopRangingBeacons(in: region as! CLBeaconRegion)
       }
-    }
+      
+      var beaconDict: [String: Any] = [
+          "uuid": (region as! CLBeaconRegion).uuid.uuidString
+      ]
 
+      if let major = (region as? CLBeaconRegion)?.major {
+          beaconDict["major"] = major
+      }
+
+      if let minor = (region as? CLBeaconRegion)?.minor {
+          beaconDict["minor"] = minor
+      }
+      
+      MyEventEmitter.shared?.watchBeacons(beacons: [beaconDict])
+    }
   }
 
   public func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
