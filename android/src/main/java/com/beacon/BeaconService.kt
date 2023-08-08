@@ -74,10 +74,10 @@ class BeaconService: Service(), ServiceInterface {
 
     this.enableBackgroundService()
 
-    beaconManager.backgroundScanPeriod = 1000
-    beaconManager.backgroundBetweenScanPeriod = 1000
-    beaconManager.foregroundScanPeriod = 1000
-    beaconManager.foregroundBetweenScanPeriod = 1000
+    beaconManager.backgroundScanPeriod = 1100
+    beaconManager.backgroundBetweenScanPeriod = 0
+    beaconManager.foregroundScanPeriod = 1100
+    beaconManager.foregroundBetweenScanPeriod = 0
     beaconManager.updateScanPeriods()
 
     beaconManager.addMonitorNotifier(mMonitorNotifier)
