@@ -209,7 +209,7 @@ class Beacon: NSObject, CLLocationManagerDelegate {
   }
   
   func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
-    let beaconsDict = beacons.filter({ beacon in
+    var beaconsDict = beacons.filter({ beacon in
       beacon.accuracy > -1
     }).map { beacon in
       [
@@ -217,11 +217,23 @@ class Beacon: NSObject, CLLocationManagerDelegate {
         "distance": beacon.accuracy,
         "major": beacon.major,
         "minor": beacon.minor,
-      ]
+      ] as [String : Any]
     }
     
     if (beaconsDict.isEmpty) {
-      return
+      var beaconDict: [String: Any] = [
+          "uuid": region.uuid.uuidString
+      ]
+
+      if let major = region.major {
+          beaconDict["major"] = major
+      }
+
+      if let minor = region.minor {
+          beaconDict["minor"] = minor
+      }
+      
+      beaconsDict = [beaconDict]
     }
     
     MyEventEmitter.shared?.watchBeacons(beacons: beaconsDict)
