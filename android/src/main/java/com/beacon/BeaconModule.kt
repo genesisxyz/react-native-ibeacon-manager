@@ -1,7 +1,6 @@
 package com.beacon
 
 import android.Manifest
-import android.app.NotificationManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -9,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.PermissionAwareActivity
@@ -29,23 +27,9 @@ class BeaconModule(reactContext: ReactApplicationContext) :
   fun setOptions(options: ReadableMap) {
     beaconServiceConnection.setOptions(options)
 
-    Notification.updateNotification(reactApplicationContext, options.toHashMap())
+    val notificationManager = NotificationManager.getInstance(reactApplicationContext.applicationContext)
 
-    Notification.notificationBuilder?.get()?.run {
-      setContentTitle(Notification.notificationContentTitle)
-      setContentText(Notification.notificationContentText)
-
-      val smallIconId = Notification.getSmallIconId(reactApplicationContext)
-      if (smallIconId != 0) {
-        setSmallIcon(smallIconId);
-      }
-
-      val notificationManager = reactApplicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager;
-      notificationManager.notify(
-        Notification.notificationId,
-        build()
-      );
-    }
+    notificationManager.updateNotification(options.toHashMap())
   }
 
   @ReactMethod

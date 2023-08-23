@@ -17,6 +17,9 @@ interface ServiceBinderInterface: IBinder {
 
 interface ServiceInterface {
     fun updateOptions(options: HashMap<String, Any>?)
+    // fun setParentContext(context: Context?)
+    fun startForeground()
+    fun stop()
 }
 
 class ConnectService(private val reactContext: ReactApplicationContext, private val serviceClass: Class<*>): LifecycleEventListener {
@@ -39,8 +42,8 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
             Log.i(TAG, "Intent service started")
             Log.i(TAG, "onServiceConnected")
 
-            val binder: ServiceBinderInterface = service as ServiceBinderInterface
-            mService = binder.service
+            mService = (service as ServiceBinderInterface).service
+            mService!!.startForeground()
             mBound = true
             mStartPromise?.resolve(true)
             mStartPromise = null
@@ -71,6 +74,7 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
 
     fun stopService(promise: Promise) {
         if (intentService != null) {
+            mService?.stop();
             reactContext.unbindService(connection)
             reactContext.stopService(intentService)
             mBound = false
