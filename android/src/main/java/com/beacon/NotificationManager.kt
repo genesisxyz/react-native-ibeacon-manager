@@ -11,6 +11,7 @@ import android.os.Build
 import java.lang.ref.WeakReference
 
 class NotificationManager(private val context: Context) {
+
     companion object {
         private const val TAG = "Notification"
         private const val NOTIFICATION_ID = 12345678
@@ -18,24 +19,11 @@ class NotificationManager(private val context: Context) {
         private const val NOTIFICATION_CONTENT_TITLE = "Beacon"
         private const val NOTIFICATION_CONTENT_TEXT = "Beacon scan enabled"
         private const val NOTIFICATION_SMALL_ICON = "ic_launcher"
-
-        @Volatile
-        private var INSTANCE: com.beacon.NotificationManager? = null
-
-        fun getInstance(context: Context): com.beacon.NotificationManager {
-            return INSTANCE ?: synchronized(this) {
-                val instance = com.beacon.NotificationManager(context)
-                INSTANCE = instance
-                instance
-            }
-        }
     }
 
-    // var notificationBuilder: WeakReference<NotificationCompat.Builder>? = null
+    private lateinit var notificationBuilder: NotificationCompat.Builder
 
-    private var notificationBuilder: NotificationCompat.Builder? = null
-
-    var notification: Notification? = null
+    lateinit var notification: Notification
 
     private val smallIconId: Int
         get() {
@@ -61,11 +49,11 @@ class NotificationManager(private val context: Context) {
     var notificationSmallIcon = NOTIFICATION_SMALL_ICON
         private set
 
-    private var initDone = false
+    init {
+        initNotification()
+    }
 
     fun initNotification() {
-        if (initDone) return
-
         createNotificationChannel()
 
         notificationBuilder = NotificationCompat.Builder(context, notificationChannelId)
@@ -78,7 +66,7 @@ class NotificationManager(private val context: Context) {
         if (smallIconId != 0) {
             notificationBuilder!!.setSmallIcon(smallIconId);
         }
-
+        /*
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         if (intent != null) {
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -86,11 +74,9 @@ class NotificationManager(private val context: Context) {
             val mutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
             val contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag)
             notificationBuilder!!.setContentIntent(contentIntent)
-        }
+        }*/
 
         notification = notificationBuilder!!.build()
-
-        initDone = true
     }
 
     private fun createNotificationChannel() {
@@ -144,8 +130,10 @@ class NotificationManager(private val context: Context) {
         if (newNotificationSmallIcon != null) {
             notificationSmallIcon = newNotificationSmallIcon
         }
+    }
 
-        notificationBuilder?.run {
+    fun showNotification() {
+        notificationBuilder.run {
             setContentTitle(notificationContentTitle)
             setContentText(notificationContentText)
 
@@ -158,8 +146,8 @@ class NotificationManager(private val context: Context) {
             this@NotificationManager.notification = build()
 
             notificationManager.notify(
-                notificationId,
-                this@NotificationManager.notification
+                    notificationId,
+                    this@NotificationManager.notification
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.beacon
 
+import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -18,7 +19,7 @@ interface ServiceBinderInterface: IBinder {
 interface ServiceInterface {
     fun updateOptions(options: HashMap<String, Any>?)
     // fun setParentContext(context: Context?)
-    fun startForeground()
+    fun start(notificationId: Int, notification: Notification)
     fun stop()
 }
 
@@ -36,6 +37,8 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
 
     var intentService: Intent? = null
 
+    var notificationManager = NotificationManager(reactContext)
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName,
                                         service: IBinder) {
@@ -43,7 +46,7 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
             Log.i(TAG, "onServiceConnected")
 
             mService = (service as ServiceBinderInterface).service
-            mService!!.startForeground()
+            mService!!.start(notificationManager.notificationId, notificationManager.notification)
             mBound = true
             mStartPromise?.resolve(true)
             mStartPromise = null
@@ -57,7 +60,12 @@ class ConnectService(private val reactContext: ReactApplicationContext, private 
     }
 
     fun setOptions(options: ReadableMap) {
+        notificationManager.updateNotification(options.toHashMap())
         mService?.updateOptions(options.toHashMap())
+
+        if (mBound) {
+            notificationManager.showNotification()
+        }
     }
 
     fun startService(promise: Promise) {

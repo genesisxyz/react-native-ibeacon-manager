@@ -29,14 +29,11 @@ class BeaconService : Service(), ServiceInterface {
     }
     override fun stop() {
         stopBeaconScan()
-        stopForeground(true)
         stopSelf()
     }
 
-    override fun startForeground() {
-        val notificationManager = com.beacon.NotificationManager.getInstance(applicationContext)
-
-        startForeground(notificationManager.notificationId, notificationManager.notification)
+    override fun start(notificationId: Int, notification: Notification) {
+        startForeground(notificationId, notification)
     }
 
     override fun onCreate() {
@@ -59,13 +56,6 @@ class BeaconService : Service(), ServiceInterface {
 
         beaconManager.addMonitorNotifier(mMonitorNotifier)
         beaconManager.addRangeNotifier(mRangeNotifier)
-
-        val notificationManager = com.beacon.NotificationManager.getInstance(applicationContext)
-        notificationManager.initNotification()
-
-        if (!beaconManager.isAnyConsumerBound) {
-            beaconManager.enableForegroundServiceScanning(notificationManager.notification, notificationManager.notificationId)
-        }
     }
 
     override fun onDestroy() {

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.PermissionAwareActivity
 import com.facebook.react.modules.core.PermissionListener
@@ -26,32 +25,28 @@ class BeaconModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun setOptions(options: ReadableMap) {
     beaconServiceConnection.setOptions(options)
-
-    val notificationManager = NotificationManager.getInstance(reactApplicationContext.applicationContext)
-
-    notificationManager.updateNotification(options.toHashMap())
   }
 
   @ReactMethod
   fun requestPermissions(promise: Promise) {
     val activity = currentActivity as PermissionAwareActivity?
 
-    val accessFineLocationSelfPermission = activity?.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-
     val permissions = mutableListOf<String>();
+
+    val accessFineLocationSelfPermission = activity?.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 
     if (accessFineLocationSelfPermission != PackageManager.PERMISSION_GRANTED) {
       permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-      val bluetoothConnectSelfPermission = ContextCompat.checkSelfPermission(reactApplicationContext, Manifest.permission.BLUETOOTH_CONNECT)
+      val bluetoothConnectSelfPermission = activity?.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
 
       if (bluetoothConnectSelfPermission != PackageManager.PERMISSION_GRANTED) {
         permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
       }
 
-      val bluetoothScanSelfPermission = ContextCompat.checkSelfPermission(reactApplicationContext, Manifest.permission.BLUETOOTH_SCAN)
+      val bluetoothScanSelfPermission = activity?.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)
 
       if (bluetoothScanSelfPermission != PackageManager.PERMISSION_GRANTED) {
         permissions.add(Manifest.permission.BLUETOOTH_SCAN)
