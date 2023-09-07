@@ -66,15 +66,15 @@ class NotificationManager(private val context: Context) {
         if (smallIconId != 0) {
             notificationBuilder!!.setSmallIcon(smallIconId);
         }
-        /*
+
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         if (intent != null) {
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             // We're defaulting to the behaviour prior API 31 (mutable) even though Android recommends immutability
             val mutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
             val contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag)
-            notificationBuilder!!.setContentIntent(contentIntent)
-        }*/
+            notificationBuilder.setContentIntent(contentIntent)
+        }
 
         notification = notificationBuilder!!.build()
     }
