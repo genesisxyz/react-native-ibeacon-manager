@@ -46,10 +46,11 @@ class BeaconService : Service(), ServiceInterface {
 
         beaconManager.beaconParsers.add(parser)
 
-        beaconManager.backgroundScanPeriod = 10000
-        beaconManager.backgroundBetweenScanPeriod = 0
-        beaconManager.foregroundScanPeriod = 10000
+        beaconManager.backgroundScanPeriod = 10 * 1000 // 10 seconds
+        beaconManager.backgroundBetweenScanPeriod = 60 * 1000 * 5 // 5 minutes
+        beaconManager.foregroundScanPeriod = 1100 // 1.1 seconds
         beaconManager.foregroundBetweenScanPeriod = 0
+        beaconManager.setMaxTrackingAge(60 * 1000) // 1 minute
         beaconManager.updateScanPeriods()
 
         beaconManager.setEnableScheduledScanJobs(false)
