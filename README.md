@@ -1,6 +1,30 @@
-# react-native-beacon
+<h1 align="center">
+  react-native-beacon
+</h1>
 
-Beacon manager
+<h4 align="center">Read beacons</h4>
+
+<p align="center">
+  <a href="https://badge.fury.io/js/react-native-beacon.svg">
+    <img src="https://badge.fury.io/js/react-native-beacon.svg"
+         alt="npm">
+  </a>
+  <a href="https://www.paypal.me/genesisxyz">
+    <img src="https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&amp;style=flat">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#key-features">Key Features</a> •
+  <a href="#installation">How To Use</a> •
+  <a href="#how-to-use">How To Use</a> •
+  <a href="#contributing">Contributing</a> •
+  <a href="#license">License</a>
+</p>
+
+## Key Features
+
+- Read beacons
 
 ## Installation
 
@@ -8,15 +32,9 @@ Beacon manager
 npm install react-native-beacon
 ```
 
-## Usage
+## How To Use
 
-```js
-import { multiply } from 'react-native-beacon';
-
-// ...
-
-const result = await multiply(3, 7);
-```
+Check the example app for a complete implementation
 
 ## Contributing
 
@@ -28,4 +46,6 @@ MIT
 
 ---
 
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+> [genesisxyz.dev](https://www.genesisxyz.dev) &nbsp;&middot;&nbsp;
+> GitHub [@genesisxyz](https://github.com/genesisxyz) &nbsp;&middot;&nbsp;
+> Twitter [@thedummyxyz](https://twitter.com/thedummyxyz)
