@@ -1,5 +1,5 @@
 {
-  "name": "react-native-beacon",
+  "name": "react-native-ibeacon-manager",
   "version": "0.1.0",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -41,13 +41,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/genesisxyz/react-native-beacon",
+  "repository": "https://github.com/genesisxyz/react-native-ibeacon-manager",
   "author": "Damiano Collu <colludamiano7@gmail.com> (https://github.com/genesisxyz)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/genesisxyz/react-native-beacon/issues"
+    "url": "https://github.com/genesisxyz/react-native-ibeacon-manager/issues"
   },
-  "homepage": "https://github.com/genesisxyz/react-native-beacon#readme",
+  "homepage": "https://github.com/genesisxyz/react-native-ibeacon-manager#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

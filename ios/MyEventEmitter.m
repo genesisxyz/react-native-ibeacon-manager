@@ -1,6 +1,6 @@
 //
 //  MyEventEmitter.m
-//  react-native-beacon
+//  react-native-ibeacon-manager
 //
 //  Created by Damiano Collu on 08/05/23.
 //

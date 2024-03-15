@@ -1,12 +1,12 @@
 <h1 align="center">
-  react-native-beacon
+  react-native-ibeacon-manager
 </h1>
 
 <h4 align="center">Read beacons</h4>
 
 <p align="center">
-  <a href="https://badge.fury.io/js/react-native-beacon.svg">
-    <img src="https://badge.fury.io/js/react-native-beacon.svg"
+  <a href="https://badge.fury.io/js/react-native-ibeacon-manager.svg">
+    <img src="https://badge.fury.io/js/react-native-ibeacon-manager.svg"
          alt="npm">
   </a>
   <a href="https://www.paypal.me/genesisxyz">
@@ -29,7 +29,7 @@
 ## Installation
 
 ```sh
-npm install react-native-beacon
+npm install react-native-ibeacon-manager
 ```
 
 ## How To Use

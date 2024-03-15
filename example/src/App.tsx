@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, Button } from 'react-native';
-import Beacon from 'react-native-beacon';
+import Beacon from 'react-native-ibeacon-manager';
 
 Beacon.setOptions({
   android: {
